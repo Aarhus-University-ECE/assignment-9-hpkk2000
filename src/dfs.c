@@ -1,22 +1,29 @@
-/*
- * Search an expression using DFS.
- */
-
 #include <stdio.h>		/* scanf, printf */
 #include <stdlib.h>		/* abort */
 #include <stdbool.h>		/* bool, true, false */
 #include "dfs.h"
 
-
-void DFT (node * root)
+typedef struct node
 {
-	// Implement DFS
-	// Hint: You can use print_node, print_tree and/or print_stack.
-}
+  int num;
+  bool visited;
+  struct node *rchild;
+  struct node *lchild;
+} node;
+
+typedef struct stack
+{
+  struct node *node;
+  struct stack *next;
+} stack;
 
 node *make_node (int num, node * left, node * right)
 {
-	return 0;
+  node *n = malloc(sizeof(node));
+  n->num = num;
+  n->rchild = right;
+  n->lchild = left;
+  return n;
 }
 
 void free_node (node * p)
@@ -58,25 +65,35 @@ void print_tree (node * p, int depth)
 
 stack *push (stack * topp, node * node)
 {
-	return 0;
+  stack *temp = malloc(sizeof(stack));
+  temp->node = node;
+  temp->next = topp;
+  return temp;
 }
 
 bool isEmpty (stack * topp)
 {
-  return false;
+  if (topp ==  NULL) {
+    return true;
+  } else {
+    return false;
+  }
 }
 
 node *top (stack * topp)
 {
-	return 0;
+	return topp->node;
 }
-
-// Utility function to pop topp  
-// element from the stack 
 
 stack *pop (stack * topp)
 {
-	return 0;
+	stack *temp;
+  if (!isEmpty(topp)) {
+    temp = topp;
+    topp = topp->next;
+  }
+  free(temp);
+  return topp;
 }
 
 void print_stack (stack * topp)
@@ -95,4 +112,23 @@ void print_stack (stack * topp)
   printf ("====\n");
 
   return;
+}
+
+void DFT (node * root)
+{
+	stack *stck = NULL; //Create empty stack
+  stck = push(stck,root); //push root to stack
+  while (!isEmpty(stck)) { //continue while stack isnt empty
+    node *x = top(stck); //get top element of stack (currently visiting )
+    stck = pop(stck); //remove that element from stack
+    if (x->rchild != NULL) { //if end of branch isnt reached
+      stck = push(stck,x->rchild); //add children of current to stack
+    }
+    if (x->lchild != NULL) {
+      stck = push(stck,x->lchild);
+    }
+    printf(" ");
+    print_node(x); //print current element
+  }
+
 }
