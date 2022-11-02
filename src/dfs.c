@@ -1,47 +1,107 @@
+/*
+ * Search an expression using DFS.
+ */
+
 #include <stdio.h>		/* scanf, printf */
 #include <stdlib.h>		/* abort */
 #include <stdbool.h>		/* bool, true, false */
 #include "dfs.h"
 
-typedef struct node
-{
-  int num;
-  bool visited;
-  struct node *rchild;
-  struct node *lchild;
-} node;
 
-typedef struct stack
+void DFT (node * root)
 {
-  struct node *node;
-  struct stack *next;
-} stack;
+  printf("TREE: \n");
+  print_tree(root, 0);
+  printf("\nDFS USING STACK: \n");
+
+
+  //Make stack
+  stack *stack = malloc(sizeof(stack));
+  node *temp = root;
+
+
+
+  //ALT KODE MED STACK
+
+  //Push root node
+  printf("%d",root->num);
+  stack = push(stack, root);
+  temp->visited = true;
+  bool done = false;
+
+  //Looper indtil min condition (stack->next->node==root && root->rchild->visited == true) er mødt
+  while (!done) {
+
+  //Går så langt til venstre som muligt af træet. Printer, pusher og markerer som alle på vegen som besøgt.
+  while (temp->lchild != NULL) {
+    temp=temp->lchild;
+    printf(", %d", temp->num);
+    stack = push(stack, temp);
+
+    //Visited markerer om et node er blevet besøgt. Hvis den er besøgt, så skal den betragtes som en leaf node af sin parent.
+    temp->visited=true;
+  }
+
+  //
+  //Tjekker om hvorvidt en node har definerede child noder som den mangler at undersøge. Hvis ikke, skal den finde sin egen parent node, og temp skal pege derhen.
+  while ((temp->lchild == NULL || temp->lchild->visited == true) && (temp->rchild == NULL || temp->rchild->visited == true) ) {
+  
+    //I tilfældet hvor vi er tilbage ved root af træet, skal right child undersøges. Hvis den er besøgt allerede er vi færdige.
+    if (stack->next->node==root && root->rchild->visited == true) {
+      done = true;
+    }
+    stack=pop(stack);
+    temp=stack->node;
+
+  if (done) {
+    break;
+  }
+
+  }
+
+if (done) {
+    break;
+  }
+  
+
+  temp=temp->rchild;
+  printf(", %d",temp->num);
+  stack = push(stack, temp);
+  temp->visited=true;
+
+  }
+
+  printf("\n");
+
+}
 
 node *make_node (int num, node * left, node * right)
 {
-  node *n = malloc(sizeof(node));
-  n->num = num;
-  n->rchild = right;
-  n->lchild = left;
-  return n;
+  node *treePtr = malloc(sizeof(node));
+
+  //Laver en node med num, left og right child, og en status om den er besøgt eller ej.
+  (treePtr)->num=num;
+  (treePtr)->visited=false;
+  (treePtr)->lchild = left;  
+  (treePtr)->rchild = right;
+
+  return treePtr;
 }
 
-void free_node (node * p)
-{
-	
+void free_node (node * p) {
+  free(p);
 }
 
 
 void print_node (node * p)
 {
-
   if (p == NULL)
     printf ("NULL\n");
   else
     printf ("%d", p->num);
 }
 
-
+//Giver segentation fejl, så benytter mig ikke af den.
 void print_tree (node * p, int depth)
 {
   for (int i = 0; i < depth; i = i + 1)
@@ -63,36 +123,37 @@ void print_tree (node * p, int depth)
     print_tree (p->rchild, depth + 1);
 }
 
-stack *push (stack * topp, node * node)
-{
-  stack *temp = malloc(sizeof(stack));
-  temp->node = node;
-  temp->next = topp;
-  return temp;
+//Det sidste tilføjede (pushede) node i stacken bliver placeret i starten af stacken. Så er parent node, til noden vi undersøger i temp, først i stacken.
+stack *push (stack * topp, node * node) {
+
+  stack *t = malloc(sizeof(stack));
+
+  t->next=topp;
+  t->node=node;
+
+  return t;
 }
 
 bool isEmpty (stack * topp)
 {
-  if (topp ==  NULL) {
-    return true;
-  } else {
-    return false;
-  }
+  
 }
 
 node *top (stack * topp)
 {
-	return topp->node;
+	
 }
 
+// Utility function to pop topp  
+// element from the stack 
+
+//Popper den første node i stacken, og returnerer noden efter. Denne returnerede pointer peger på parent node i træet. Denne bruges til at finde tilbage.)
 stack *pop (stack * topp)
 {
-	stack *temp;
-  if (!isEmpty(topp)) {
-    temp = topp;
-    topp = topp->next;
-  }
+  stack *temp = topp;
+  topp = topp->next;
   free(temp);
+
   return topp;
 }
 
@@ -104,31 +165,11 @@ void print_stack (stack * topp)
     {
 
       print_node (temp->node);
-      printf ("\n");
-
+      
       temp = temp->next;
     }
 
   printf ("====\n");
 
   return;
-}
-
-void DFT (node * root)
-{
-	stack *stck = NULL; //Create empty stack
-  stck = push(stck,root); //push root to stack
-  while (!isEmpty(stck)) { //continue while stack isnt empty
-    node *x = top(stck); //get top element of stack (currently visiting )
-    stck = pop(stck); //remove that element from stack
-    if (x->rchild != NULL) { //if end of branch isnt reached
-      stck = push(stck,x->rchild); //add children of current to stack
-    }
-    if (x->lchild != NULL) {
-      stck = push(stck,x->lchild);
-    }
-    printf(" ");
-    print_node(x); //print current element
-  }
-
 }
